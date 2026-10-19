@@ -14,14 +14,38 @@ if (session_status() === PHP_SESSION_NONE) {
  * Inisialisasi data mahasiswa pada session jika belum ada
  */
 function init_mahasiswa_session() {
-    
+    if (!isset($_SESSION['daftar_mahasiswa'])) {
+        $_SESSION['daftar_mahasiswa'] = [
+            [
+                'npm' => '210001',
+                'nama' => 'Ahmad Fauzi',
+                'program_studi' => 'Teknik Informatika',
+                'angkatan' => 2021,
+                'email' => 'ahmad.fauzi@example.com'
+            ],
+            [   
+                'npm' => '210002',
+                'nama' => 'Siti Rahma',
+                'program_studi' => 'Sistem Informasi',
+                'angkatan' => 2021,
+                'email' => 'siti.rahma@example.com'
+            ],
+            [
+                'npm' => '210003',
+                'nama' => 'Budi Santoso',
+                'program_studi' => 'Teknik Informatika',
+                'angkatan' => 2022,
+                'email' => 'budi.santoso@example.com'
+            ]
+        ];
+    }
 }
 
 /**
  * Sanitasi string input untuk keamanan XSS
  */
 function sanitize($data) {
-   
+   return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
 
 /**
@@ -55,7 +79,8 @@ function get_all_mahasiswa($keyword = '') {
  * Menghitung total data mahasiswa yang tersimpan
  */
 function count_total_mahasiswa() {
-    
+    init_mahasiswa_session();
+    return count($_SESSION['daftar_mahasiswa']);
 }
 
 /**
@@ -65,8 +90,11 @@ function tambah_mahasiswa($npm, $nama, $program_studi, $angkatan, $email) {
     init_mahasiswa_session();
 
     // Sanitasi data
-    // Percobaan 4-3 Langkah 3
-    
+    $npm = sanitize($npm);
+    $nama = sanitize($nama);
+    $program_studi = sanitize($program_studi);
+    $angkatan = (int) $angkatan;
+    $email = sanitize($email);
 
     // Validasi Server-Side
     if (empty($npm) || empty($nama) || empty($program_studi) || empty($angkatan) || empty($email)) {
@@ -165,10 +193,21 @@ function hapus_mahasiswa($npm) {
 /**
  * Set flash message untuk feedback notifikasi pengguna
  */
-
+function set_flash_message($type, $message) {
+    $_SESSION['flash'] = [
+        'type' => $type,
+        'message' => $message
+    ];
+}
 
 /**
  * Ambil dan hapus flash message
  */
-
-
+function get_flash_message() {
+    if (isset($_SESSION['flash'])) {
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        return $flash;
+    }
+    return null;
+}
